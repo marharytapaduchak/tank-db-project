@@ -1,15 +1,51 @@
-# HW3: Database
+# HW3: Database Main Battle Tanks
 
-Open the project in IntelliJ IDEA using the `Open` option.
+This project is based on the original repository:  
+https://github.com/stpavliuk/flights-db-hw-3.git  
 
-Now you can build the sources using either `./gradlew build` command or using the `Build` option in IntelliJ IDEA.
+The initial structure and setup were taken from the provided template and extended to implement a database system for managing military tank operations.
 
-Then you can run the project using the `./gradlew bootRun` command or using the `Run` or `Debug` option in IntelliJ IDEA.
+---
 
-### 1.4. Verify
+## Project Overview
 
-Open the following URL in your browser:
+The system manages key entities such as:
+- Tanks  
+- Assignments  
+- Maintenance records  
+- Inspections  
+- Incidents  
 
+It also provides reporting functionality:
+- Assignment History Report  
+- Maintenance History Report  
+- Readiness Overview Report  
+
+---
+
+## How to Run
+
+### 1. Open the project
+Open the project in IntelliJ IDEA using the **Open** option.
+
+---
+
+### 2. Build the project
+
+```bash
+./gradlew build
 ```
+
+---
+
+### 3. Build the project
+```bash
+./gradlew bootRun
+```
+or use Run / Debug in IntelliJ.
+
+---
+
+### 4. Verify
+Open in browser:
 http://localhost:8080
-```
