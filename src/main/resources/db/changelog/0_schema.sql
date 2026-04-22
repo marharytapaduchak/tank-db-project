@@ -1,235 +1,132 @@
-
-CREATE TABLE airport
+CREATE TABLE Manufacturer
 (
-    airport_code CHAR(3)      NOT NULL PRIMARY KEY COMMENT 'Airport Code: primary key inline declaration.',
-    airport_name VARCHAR(255) NOT NULL COMMENT 'Full name of the Airport'
-) ENGINE = innodb COMMENT = 'Airport entity type.';
-
-
-
-CREATE TABLE airline
-(
-    code CHAR(2) COMMENT 'Airline Code.',
-    name VARCHAR(100) NOT NULL COMMENT 'Full name of the Airline.',
-
-    CONSTRAINT pk_airline PRIMARY KEY (code)
+    ManufacturerID   INT NOT NULL PRIMARY KEY,
+    ManufacturerName VARCHAR(255) NOT NULL,
+    CountryOfOrigin  VARCHAR(100) NOT NULL,
+    FoundedYear      INT NOT NULL
 );
 
-
-CREATE TABLE aircraft_type
+CREATE TABLE TankModel
 (
-    type_designator CHAR(4) COMMENT 'The ICAO (International Civil Aviation Organization) assigns 4-character codes to identify aircraft types.',
-    model           VARCHAR(100) NOT NULL COMMENT 'Model of the aircraft.',
+    ModelID         INT NOT NULL PRIMARY KEY,
+    ModelName       VARCHAR(255) NOT NULL,
+    CrewSize        INT NOT NULL,
+    ManufacturerID  INT NOT NULL,
 
-    CONSTRAINT pk_aircraft_code PRIMARY KEY (type_designator)
+    CONSTRAINT fk_tankmodel_manufacturer
+        FOREIGN KEY (ManufacturerID)
+            REFERENCES Manufacturer (ManufacturerID)
+            ON DELETE RESTRICT
+            ON UPDATE CASCADE
 );
 
-
-CREATE TABLE aircraft
+CREATE TABLE MilitaryUnit
 (
-    airline_code  CHAR(2),
-    number        VARCHAR(10),
-    aircraft_type CHAR(4),
-
-    CONSTRAINT pk_aircraft
-        PRIMARY KEY (airline_code, number) COMMENT 'Airline Code and Aircraft Number uniquely identifies an aircraft.',
-
-    CONSTRAINT fk_aircraft_airline_code
-        FOREIGN KEY (airline_code) REFERENCES airline (code) ON DELETE CASCADE ON UPDATE CASCADE,
-
-    CONSTRAINT fk_aircraft_aircraft_code
-        FOREIGN KEY (aircraft_type) REFERENCES aircraft_type (type_designator) ON DELETE RESTRICT ON UPDATE CASCADE
-
+    UnitID             INT NOT NULL PRIMARY KEY,
+    UnitName           VARCHAR(255) NOT NULL,
+    UnitType           VARCHAR(100) NOT NULL,
+    HomeBaseLocation   VARCHAR(255) NOT NULL,
+    Country            VARCHAR(100) NOT NULL,
+    City               VARCHAR(100) NOT NULL,
+    BaseName           VARCHAR(255) NOT NULL
 );
 
-
-CREATE TABLE meal_type
+CREATE TABLE Tank
 (
-    type VARCHAR(40) NOT NULL COMMENT 'Type of the meal type',
+    TankID               INT NOT NULL PRIMARY KEY,
+    FactorySerialNumber  VARCHAR(100) NOT NULL,
+    ProductionYear       INT NOT NULL,
+    CurrentBaseLocation  VARCHAR(255) NOT NULL,
+    Country              VARCHAR(100) NOT NULL,
+    City                 VARCHAR(100) NOT NULL,
+    FacilityName         VARCHAR(255) NOT NULL,
+    ModelID              INT NOT NULL,
 
-    CONSTRAINT pk_meal_type PRIMARY KEY (type)
-) COMMENT 'Meal Type - reference table.';
+    CONSTRAINT uq_tank_serial UNIQUE (FactorySerialNumber),
 
-
-CREATE TABLE meal
-(
-    id   BIGINT AUTO_INCREMENT,
-    name VARCHAR(50) NOT NULL COMMENT 'Name of the meal type',
-    type VARCHAR(13) NOT NULL COMMENT 'Type of the meal type',
-
-    CONSTRAINT pk_meal PRIMARY KEY (id),
-
-    CONSTRAINT fk_meal_type
-        FOREIGN KEY (type) REFERENCES meal_type (type) ON DELETE RESTRICT ON UPDATE CASCADE
-) COMMENT 'Reference table of all.';
-
-
-CREATE TABLE beverage_type
-(
-    type  VARCHAR(40)    NOT NULL COMMENT 'Beverage type.',
-    h_o_c ENUM ('H','C') NOT NULL COMMENT 'Hot or Cold: H, C',
-
-    CONSTRAINT pk_beverage_type PRIMARY KEY (type)
-) COMMENT 'Beverage Type - reference table.';
-
-
-CREATE TABLE beverage
-(
-    id          BIGINT AUTO_INCREMENT,
-    name        VARCHAR(13)                      NOT NULL COMMENT 'Name of the beverage type',
-    type        VARCHAR(13)                      NOT NULL COMMENT 'Type of the beverage.',
-    unit        ENUM ('Bottle','Pack','Serving') NOT NULL COMMENT 'Unit of the beverage',
-    qty_in_unit SMALLINT                         NOT NULL COMMENT 'Quantity in one unit',
-
-    CONSTRAINT pk_beverage PRIMARY KEY (id),
-
-    CONSTRAINT fk_beverage_type
-        FOREIGN KEY (type) REFERENCES beverage_type (type) ON DELETE RESTRICT ON UPDATE CASCADE
+    CONSTRAINT fk_tank_model
+        FOREIGN KEY (ModelID)
+            REFERENCES TankModel (ModelID)
+            ON DELETE RESTRICT
+            ON UPDATE CASCADE
 );
 
-
-CREATE TABLE flight
+CREATE TABLE TankRadioFrequency
 (
-    id                BIGINT AUTO_INCREMENT COMMENT 'Surrogate key for the flight entity.',
-    no                VARCHAR(10) COMMENT 'Flight number (Part of PK), Example: AA335',
+    TankID      INT NOT NULL,
+    Frequency   VARCHAR(50) NOT NULL,
 
-    departure_date    DATE        NOT NULL COMMENT 'Departure Date (Part of PK)',
-    departure_time          TIME        NOT NULL COMMENT 'Departure time',
+    CONSTRAINT pk_tankradiofrequency
+        PRIMARY KEY (TankID, Frequency),
 
-    check_in_time     TIME        NOT NULL COMMENT 'Check-in time',
-
-    arrival_date      DATE        NOT NULL COMMENT 'Arrival Date',
-    arrival_time      TIME        NOT NULL COMMENT 'Arrival time',
-
-    from_airport_code CHAR(3)     NOT NULL COMMENT 'From Airport Code: N:1 (Many to one)',
-    to_airport_code   CHAR(3)     NOT NULL COMMENT 'To Airport Code: N:1 (Many to one)',
-
-    airline_code      CHAR(2)     NOT NULL COMMENT 'Airline Code: N:1 (Many to one)',
-    aircraft_number   VARCHAR(10) NOT NULL COMMENT 'Aircraft Number: N:1 (Many to one)',
-
-    # duration is not needed unless we want to create a trigger to update it automatically
-    # should be derived from (arrival_date, arrival_time) - (dep_time
-
-    CONSTRAINT pk_flight PRIMARY KEY (id) COMMENT 'Primary key for the flight entity.',
-
-    CONSTRAINT fk_flight_from_airport_code
-        FOREIGN KEY (from_airport_code) REFERENCES airport (airport_code) ON DELETE RESTRICT ON UPDATE CASCADE,
-
-    CONSTRAINT fk_flight_to_airport_code
-        FOREIGN KEY (to_airport_code) REFERENCES airport (airport_code) ON DELETE RESTRICT ON UPDATE CASCADE,
-
-    CONSTRAINT fk_flight_airline_code
-        FOREIGN KEY (airline_code) REFERENCES airline (code) ON DELETE RESTRICT ON UPDATE CASCADE,
-
-    CONSTRAINT fk_flight_aircraft
-        FOREIGN KEY (airline_code, aircraft_number) REFERENCES aircraft (airline_code, number) ON DELETE RESTRICT ON UPDATE CASCADE,
-
-    CONSTRAINT uq_flight_no_dep_date
-        UNIQUE (no, departure_date) COMMENT 'Unique constraint to ensure no duplicate flight records.'
-) ENGINE = innodb COMMENT = 'Flight entity type.';
-
-
-CREATE TABLE loaded_meals
-/* LoadedMeals ET. Source: Catering & Galley Loading Plan */
-(
-    meal_type         VARCHAR(40) NOT NULL,
-    flight_id         BIGINT      NOT NULL,
-
-    quantity          SMALLINT    NOT NULL DEFAULT 0,
-
-    CONSTRAINT pk_loaded_meals PRIMARY KEY (meal_type, flight_id),
-
-    CONSTRAINT fk_loaded_meals_flight_id
-        FOREIGN KEY (flight_id) REFERENCES flight (id) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT fk_loaded_meals_meal_type
-        FOREIGN KEY (meal_type) REFERENCES meal_type (type) ON DELETE CASCADE ON UPDATE CASCADE
-) COMMENT 'LoadedMeals ET. Source: Catering & Galley Loading Plan';
-
-
-CREATE TABLE loaded_beverages
-(
-    beverage_type     VARCHAR(40) NOT NULL,
-    flight_id         BIGINT      NOT NULL,
-
-    quantity          SMALLINT    NOT NULL DEFAULT 0,
-    servings_quantity SMALLINT    NOT NULL DEFAULT 0 COMMENT 'Quantity served to passengers. Why this column is here?',
-
-    CONSTRAINT pk_loaded_beverages PRIMARY KEY (flight_id, beverage_type),
-
-    CONSTRAINT fk_loaded_beverages_flight_id
-        FOREIGN KEY (flight_id) REFERENCES flight (id) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT fk_loaded_beverages_beverage_type
-        FOREIGN KEY (beverage_type) REFERENCES beverage_type (type) ON DELETE CASCADE ON UPDATE CASCADE
-) COMMENT 'LoadedBeverages ET. Source: Catering & Galley Loading Plan';
-
-
-
-CREATE TABLE passenger
-/* Passenger ET. Source: Passenger & Cargo Manifest */
-(
-    # ticket no can be split into 2 parts: 3-char airline code and 10-char ticket number
-    ticket_no      CHAR(13)                       NOT NULL PRIMARY KEY COMMENT 'Ticket Number (IATA format): PK',
-    flight_id      BIGINT                         NOT NULL COMMENT 'Flight ID: FK',
-
-    full_name      VARCHAR(255)                   NOT NULL COMMENT 'Full name of the passenger',
-    flight_class   ENUM ('F','B','E')             NOT NULL COMMENT 'Flight Class: F, B, E; flightClass: rows: 1-5 - First;6-10 - Business; 11-inf - Economy',
-    seat_row       SMALLINT                       NOT NULL,
-    seat_letter    ENUM ('A','B','C','D','E','F') NOT NULL,
-    credit_card_no CHAR(16),
-
-    CONSTRAINT fk_flight
-        FOREIGN KEY (flight_id) REFERENCES flight (id)
-            ON UPDATE CASCADE ON DELETE CASCADE
+    CONSTRAINT fk_tankradiofrequency_tank
+        FOREIGN KEY (TankID)
+            REFERENCES Tank (TankID)
+            ON DELETE CASCADE
+            ON UPDATE CASCADE
 );
 
-CREATE TABLE passenger_meal_preorder
+CREATE TABLE TankAssignment
 (
-    ticket_no CHAR(13) PRIMARY KEY,
-    meal_type VARCHAR(13) NOT NULL,
+    AssignmentID INT NOT NULL PRIMARY KEY,
+    TankID       INT NOT NULL,
+    StartDate    DATE NOT NULL,
+    EndDate      DATE NULL,
 
-    CONSTRAINT fk_passenger_meal_preference_ticket_no
-        FOREIGN KEY (ticket_no) REFERENCES passenger (ticket_no) ON DELETE CASCADE ON UPDATE CASCADE,
-
-    CONSTRAINT fk_passenger_meal_preference_meal_type
-        FOREIGN KEY (meal_type) REFERENCES meal_type (type) ON DELETE RESTRICT ON UPDATE CASCADE
+    CONSTRAINT fk_tankassignment_tank
+        FOREIGN KEY (TankID)
+            REFERENCES Tank (TankID)
+            ON DELETE CASCADE
+            ON UPDATE CASCADE
 );
 
-CREATE TABLE passenger_beverage_preorder
+CREATE TABLE MaintenanceRecord
 (
-    ticket_no     CHAR(13),
-    beverage_type VARCHAR(13) NOT NULL,
+    RecordID          INT NOT NULL PRIMARY KEY,
+    TankID            INT NOT NULL,
+    UnitID            INT NOT NULL,
+    MaintenanceType   VARCHAR(255) NOT NULL,
+    MaintenanceDate   DATE NOT NULL,
 
-    CONSTRAINT pk_passenger_beverage_preorder PRIMARY KEY (ticket_no, beverage_type),
+    CONSTRAINT fk_maintenancerecord_tank
+        FOREIGN KEY (TankID)
+            REFERENCES Tank (TankID)
+            ON DELETE CASCADE
+            ON UPDATE CASCADE,
 
-    CONSTRAINT fk_passenger_beverage_preference_ticket_no
-        FOREIGN KEY (ticket_no) REFERENCES passenger (ticket_no) ON DELETE CASCADE ON UPDATE CASCADE,
-
-    CONSTRAINT fk_passenger_beverage_preference_beverage_type
-        FOREIGN KEY (beverage_type) REFERENCES beverage_type (type) ON DELETE RESTRICT ON UPDATE CASCADE
+    CONSTRAINT fk_maintenancerecord_unit
+        FOREIGN KEY (UnitID)
+            REFERENCES MilitaryUnit (UnitID)
+            ON DELETE RESTRICT
+            ON UPDATE CASCADE
 );
 
-CREATE TABLE passenger_meal_served
+CREATE TABLE Inspection
 (
-    ticket_no CHAR(13) PRIMARY KEY,
-    meal_type VARCHAR(13) NOT NULL,
+    InspectionID      INT NOT NULL PRIMARY KEY,
+    RecordID          INT NOT NULL,
+    InspectionType    VARCHAR(255) NOT NULL,
+    InspectionResult  VARCHAR(255) NOT NULL,
 
-    CONSTRAINT fk_passenger_meal_served_ticket_no
-        FOREIGN KEY (ticket_no) REFERENCES passenger (ticket_no) ON DELETE CASCADE ON UPDATE CASCADE,
-
-    CONSTRAINT fk_passenger_meal_served_meal_type
-        FOREIGN KEY (meal_type) REFERENCES meal_type (type) ON DELETE RESTRICT ON UPDATE CASCADE
+    CONSTRAINT fk_inspection_record
+        FOREIGN KEY (RecordID)
+            REFERENCES MaintenanceRecord (RecordID)
+            ON DELETE CASCADE
+            ON UPDATE CASCADE
 );
 
-CREATE TABLE passenger_beverage_served
+CREATE TABLE TankIncident
 (
-    ticket_no     CHAR(13),
-    beverage_type VARCHAR(13) NOT NULL,
+    IncidentID      INT NOT NULL PRIMARY KEY,
+    TankID          INT NOT NULL,
+    IncidentDate    DATE NOT NULL,
+    IncidentType    VARCHAR(255) NOT NULL,
+    Description     TEXT NULL,
+    SeverityLevel   VARCHAR(50) NOT NULL,
 
-    CONSTRAINT pk_passenger_beverage_served PRIMARY KEY (ticket_no, beverage_type),
-
-    CONSTRAINT fk_passenger_beverage_served_ticket_no
-        FOREIGN KEY (ticket_no) REFERENCES passenger (ticket_no) ON DELETE CASCADE ON UPDATE CASCADE,
-
-    CONSTRAINT fk_passenger_beverage_served_beverage_type
-        FOREIGN KEY (beverage_type) REFERENCES beverage_type (type) ON DELETE RESTRICT ON UPDATE CASCADE
+    CONSTRAINT fk_tankincident_tank
+        FOREIGN KEY (TankID)
+            REFERENCES Tank (TankID)
+            ON DELETE CASCADE
+            ON UPDATE CASCADE
 );

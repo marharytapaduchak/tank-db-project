@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Tank</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background: #f7f7f7;
+        }
+        .container {
+            max-width: 750px;
+            margin: 0 auto;
+            background: white;
+            padding: 24px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        label {
+            display: block;
+            margin-top: 14px;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            padding: 10px 14px;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-save {
+            background: #28a745;
+            color: white;
+        }
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 th:text="${pageTitle}">Add Tank</h1>
+
+    <form th:action="@{${formAction}}" method="post">
+        <label for="factorySerialNumber">Factory Serial Number</label>
+        <input id="factorySerialNumber" name="factorySerialNumber" type="text" th:value="${tank.factorySerialNumber()}" required>
+
+        <label for="productionYear">Production Year</label>
+        <input id="productionYear" name="productionYear" type="number" th:value="${tank.productionYear()}" required>
+
+        <label for="currentBaseLocation">Current Base Location</label>
+        <input id="currentBaseLocation" name="currentBaseLocation" type="text" th:value="${tank.currentBaseLocation()}" required>
+
+        <label for="country">Country</label>
+        <input id="country" name="country" type="text" th:value="${tank.country()}" required>
+
+        <label for="city">City</label>
+        <input id="city" name="city" type="text" th:value="${tank.city()}" required>
+
+        <label for="facilityName">Facility Name</label>
+        <input id="facilityName" name="facilityName" type="text" th:value="${tank.facilityName()}" required>
+
+        <label for="modelId">Model ID</label>
+        <input id="modelId" name="modelId" type="number" min="1" th:value="${tank.modelId()}" required>
+
+        <div class="buttons">
+            <button class="btn btn-save" type="submit" th:text="${submitLabel}">Create Tank</button>
+            <a class="btn btn-cancel" th:href="@{/tank}">Cancel</a>
+        </div>
+    </form>
+</div>
+</body>
+</html>

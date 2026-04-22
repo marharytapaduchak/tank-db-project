@@ -8,6 +8,6 @@ public class IndexController {
 
     @GetMapping("/")
     public String homepage() {
-        return "redirect:/flight";
+        return "redirect:/tankincident";
     }
 }

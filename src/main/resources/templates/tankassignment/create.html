@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Tank Assignment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background: #f7f7f7;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            padding: 24px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        label {
+            display: block;
+            margin-top: 14px;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            padding: 10px 14px;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-save {
+            background: #28a745;
+            color: white;
+        }
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 th:text="${pageTitle}">Add Tank Assignment</h1>
+
+    <form th:action="@{${formAction}}" method="post">
+        <label for="tankId">Tank ID</label>
+        <input id="tankId" name="tankId" type="number" min="1" th:value="${assignment.tankId()}" required>
+
+        <label for="startDate">Start Date</label>
+        <input id="startDate" name="startDate" type="date" th:value="${assignment.startDate()}" required>
+
+        <label for="endDate">End Date</label>
+        <input id="endDate" name="endDate" type="date" th:value="${assignment.endDate()}">
+
+        <div class="buttons">
+            <button class="btn btn-save" type="submit" th:text="${submitLabel}">Create Assignment</button>
+            <a class="btn btn-cancel" th:href="@{/tankassignment}">Cancel</a>
+        </div>
+    </form>
+</div>
+</body>
+</html>

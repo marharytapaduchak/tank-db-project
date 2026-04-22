@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Tank Readiness Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            margin: 40px;
+        }
+
+        .page {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .report-card {
+            background: white;
+            border: 3px solid #222;
+            padding: 48px 56px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .report-title {
+            font-size: 48px;
+            font-weight: 500;
+            margin: 0 0 40px 0;
+            line-height: 1.15;
+        }
+
+        .report-subtitle {
+            font-size: 18px;
+            color: #555;
+            margin-bottom: 28px;
+        }
+
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .report-table td {
+            padding: 14px 10px 14px 0;
+            font-size: 20px;
+            vertical-align: top;
+        }
+
+        .label {
+            font-weight: 700;
+            width: 320px;
+            white-space: nowrap;
+        }
+
+        .value {
+            font-weight: 400;
+        }
+
+        .status-ready {
+            color: #198754;
+            font-weight: 700;
+        }
+
+        .status-warning {
+            color: #d97706;
+            font-weight: 700;
+        }
+
+        .status-critical {
+            color: #dc3545;
+            font-weight: 700;
+        }
+
+        .buttons {
+            margin-top: 28px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            color: white;
+            font-size: 14px;
+        }
+
+        .btn-back {
+            background: #6c757d;
+        }
+
+        .btn-print {
+            background: #198754;
+        }
+
+        @media print {
+            body {
+                background: white;
+                margin: 0;
+            }
+
+            .buttons {
+                display: none;
+            }
+
+            .page {
+                max-width: 100%;
+                margin: 0;
+            }
+
+            .report-card {
+                box-shadow: none;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+    <div class="report-card">
+        <h1 class="report-title">Tank Readiness<br>Report</h1>
+
+        <div class="report-subtitle">
+            Operational readiness summary for the selected tank.
+        </div>
+
+        <div th:if="${#lists.isEmpty(rows)}">
+            <p style="font-size: 20px;">No readiness information found for this tank.</p>
+        </div>
+
+        <div th:each="row : ${rows}">
+            <table class="report-table">
+                <tr>
+                    <td class="label">Tank ID:</td>
+                    <td class="value" th:text="${row.tankId()}"></td>
+                </tr>
+                <tr>
+                    <td class="label">Factory Serial Number:</td>
+                    <td class="value" th:text="${row.factorySerialNumber()}"></td>
+                </tr>
+                <tr>
+                    <td class="label">Total Incidents:</td>
+                    <td class="value" th:text="${row.totalIncidents()}"></td>
+                </tr>
+                <tr>
+                    <td class="label">Last Maintenance Date:</td>
+                    <td class="value" th:text="${row.lastMaintenanceDate()}"></td>
+                </tr>
+                <tr>
+                    <td class="label">Last Assignment Start Date:</td>
+                    <td class="value" th:text="${row.lastAssignmentStartDate()}"></td>
+                </tr>
+                <tr>
+                    <td class="label">Latest Inspection Result:</td>
+                    <td class="value" th:text="${row.latestInspectionResult()}"></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="buttons">
+        <a class="btn btn-back" th:href="@{/tank/report/{id}(id=${tankId})}">Back to Reports</a>
+        <a class="btn btn-print" href="#" onclick="window.print(); return false;">Print Report</a>
+    </div>
+</div>
+</body>
+</html>
